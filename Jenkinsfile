@@ -4,43 +4,27 @@ pipeline {
     stages {
         stage('Descarga') {
             steps {
-                echo 'Obteniendo la última versión del código...'
-                echo '¡Esta es una prueba de fuego automática!'
+                echo 'Obteniendo el código...'
                 checkout scm
             }
         }
 
         stage('Test & Build') {
             steps {
-                echo 'Simulando compilación y pruebas...'
-                sh 'sleep 2' // Pausa de 2 segundos para simular trabajo
+                echo 'Ejecutando pruebas unitarias. Esto corre para TODAS las ramas.'
+                sh 'sleep 2' 
             }
         }
 
-        stage('Aprobación de Producción') {
+        stage('Despliegue a Producción') {
+            // ¡AQUÍ ESTÁ LA MAGIA DEL EXPERTO!
+            when {
+                branch 'main' // Esta etapa SOLO existirá si la rama se llama "main"
+            }
             steps {
-                // Aquí el Pipeline se detendrá mágicamente y esperará tu clic
-                input message: '¿Autorizas el despliegue a Producción, comandante Marvin?', ok: '¡Lanzar a Producción!'
-                echo '¡Permiso concedido! Desplegando en la infraestructura...'
+                input message: '¿Autorizas el despliegue oficial a Producción?', ok: '¡Lanzar!'
+                echo '¡Desplegando la versión oficial en los servidores!'
             }
-        }
-    }
-
-    // EL BLOQUE POST: Qué hacer cuando los stages terminan (bien o mal)
-    post {
-        always {
-            // Esto se ejecuta SIEMPRE. Es regla de oro borrar los archivos temporales 
-            // para no llenar el disco duro del servidor con el tiempo.
-            echo '🧹 Limpiando el espacio de trabajo...'
-            cleanWs() 
-        }
-        success {
-            // Esto solo se ejecuta si todos los stages pasaron
-            echo '✅ NOTIFICACIÓN: ¡El despliegue fue un éxito total! (Simulando mensaje a Slack)'
-        }
-        failure {
-            // Esto se ejecuta si algo falló (por ejemplo, si rechazas la aprobación manual)
-            echo '❌ ALARMA: El despliegue fue abortado o falló. (Simulando correo al equipo)'
         }
     }
 }
