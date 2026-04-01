@@ -1,48 +1,45 @@
 pipeline {
     agent any
-    
-    environment {
-        // Enlazamos la credencial de Jenkins a una variable de entorno
-        MY_SECRET = credentials('MI_LLAVE_DE_MARVIN')
-    }
 
     stages {
         stage('Descarga') {
             steps {
-                echo 'Bajando el código de Marvin desde GitHub...'
+                echo 'Obteniendo la última versión del código...'
                 checkout scm
             }
         }
 
-        stage('Validar Secretos (Depuración)') {
+        stage('Test & Build') {
             steps {
-                echo '⚠️ ADVERTENCIA: Exponiendo secreto para pruebas de laboratorio.'
-                
-                // Intento normal (Jenkins ocultará esto con ****)
-                sh 'echo "Intento normal: $MY_SECRET"'
-                
-                // Truco 1: Codificación en Base64
-                // Copia el resultado y decodifícalo en tu terminal con: echo "RESULTADO" | base64 --decode
-                sh 'echo "Base64: $(echo -n $MY_SECRET | base64)"'
-                
-                // Truco 2: Separar por espacios usando 'sed'
-                // Esto engaña al enmascaramiento de Jenkins imprimiendo M i C l a v e
-                sh 'echo "Texto separado: $(echo -n $MY_SECRET | sed "s/./& /g")"'
+                echo 'Simulando compilación y pruebas...'
+                sh 'sleep 2' // Pausa de 2 segundos para simular trabajo
             }
         }
 
-        stage('Test') {
+        stage('Aprobación de Producción') {
             steps {
-                echo 'Ejecutando pruebas unitarias en el código clonado...'
-                sh 'ls -la' 
+                // Aquí el Pipeline se detendrá mágicamente y esperará tu clic
+                input message: '¿Autorizas el despliegue a Producción, comandante Marvin?', ok: '¡Lanzar a Producción!'
+                echo '¡Permiso concedido! Desplegando en la infraestructura...'
             }
         }
+    }
 
-        stage('Build') {
-            steps {
-                echo 'Construyendo la aplicación...'
-                // Espacio listo para comandos reales de construcción
-            }
+    // EL BLOQUE POST: Qué hacer cuando los stages terminan (bien o mal)
+    post {
+        always {
+            // Esto se ejecuta SIEMPRE. Es regla de oro borrar los archivos temporales 
+            // para no llenar el disco duro del servidor con el tiempo.
+            echo '🧹 Limpiando el espacio de trabajo...'
+            cleanWs() 
+        }
+        success {
+            // Esto solo se ejecuta si todos los stages pasaron
+            echo '✅ NOTIFICACIÓN: ¡El despliegue fue un éxito total! (Simulando mensaje a Slack)'
+        }
+        failure {
+            // Esto se ejecuta si algo falló (por ejemplo, si rechazas la aprobación manual)
+            echo '❌ ALARMA: El despliegue fue abortado o falló. (Simulando correo al equipo)'
         }
     }
 }
