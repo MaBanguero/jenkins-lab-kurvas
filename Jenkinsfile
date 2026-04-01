@@ -30,9 +30,10 @@ pipeline {
                 input message: '¿Autoriza?', ok: '¡Ejecutar!'
             }
         }
-        stage('Terraform Apply') {
+        stage('Terraform Destroy') {
             steps {
-                sh 'terraform apply -input=false tfplan'
+                echo '¡Destruyendo recursos en AWS!'
+                sh 'terraform destroy -auto-approve'
             }
         }
     }
