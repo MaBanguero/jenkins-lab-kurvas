@@ -5,6 +5,7 @@ pipeline {
         stage('Descarga') {
             steps {
                 echo 'Obteniendo la última versión del código...'
+                echo '¡Esta es una prueba de fuego automática!'
                 checkout scm
             }
         }
