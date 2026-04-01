@@ -1,29 +1,38 @@
 pipeline {
     agent any
 
+    environment {
+        // Solo necesitamos el PATH para que Jenkins encuentre a Terraform
+        PATH = "/var/jenkins_home/bin:$PATH" 
+        
+        // ¡Cero llaves secretas! AWS STS se encarga por detrás de inyectar los tokens.
+        AWS_DEFAULT_REGION = 'us-east-1' 
+    }
+
     stages {
-        stage('Descarga') {
+        stage('Descarga de Infraestructura') {
             steps {
-                echo 'Obteniendo el código...'
                 checkout scm
             }
         }
-
-        stage('Test & Build') {
+        stage('Terraform Init') {
             steps {
-                echo 'Ejecutando pruebas unitarias. Esto corre para TODAS las ramas.'
-                sh 'sleep 2' 
+                sh 'terraform init'
             }
         }
-
-        stage('Despliegue a Producción') {
-            // ¡AQUÍ ESTÁ LA MAGIA DEL EXPERTO!
-            when {
-                branch 'main' // Esta etapa SOLO existirá si la rama se llama "main"
-            }
+        stage('Terraform Plan') {
             steps {
-                input message: '¿Autorizas el despliegue oficial a Producción?', ok: '¡Lanzar!'
-                echo '¡Desplegando la versión oficial en los servidores!'
+                sh 'terraform plan -out=tfplan' 
+            }
+        }
+        stage('Aprobación') {
+            steps {
+                input message: '¿Autoriza?', ok: '¡Ejecutar!'
+            }
+        }
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -input=false tfplan'
             }
         }
     }
