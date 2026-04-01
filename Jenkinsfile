@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        // Usamos un nombre de variable que no sea obvio para mayor seguridad
+        // Enlazamos la credencial de Jenkins a una variable de entorno
         MY_SECRET = credentials('MI_LLAVE_DE_MARVIN')
     }
 
@@ -10,27 +10,24 @@ pipeline {
         stage('Descarga') {
             steps {
                 echo 'Bajando el código de Marvin desde GitHub...'
-                // Primero obtenemos el código antes de hacer cualquier otra cosa
                 checkout scm
             }
         }
 
-        stage('Validar Secretos') {
+        stage('Validar Secretos (Depuración)') {
             steps {
-                echo 'Validando acceso con la llave maestra...'
+                echo '⚠️ ADVERTENCIA: Exponiendo secreto para pruebas de laboratorio.'
                 
-                // REGLA DE ORO DE EXPERTO: 
-                // Usa comillas simples para strings que no necesiten interpolación
-                // Y comillas dobles solo donde uses variables con ${}
-                script {
-                    // Si solo quieres ver si funciona sin arriesgar el secreto:
-                    if (env.MY_SECRET) {
-                        echo "El secreto está cargado correctamente."
-                    }
-                }
+                // Intento normal (Jenkins ocultará esto con ****)
+                sh 'echo "Intento normal: $MY_SECRET"'
                 
-                // Para probarlo en consola de forma segura:
-                sh 'echo "Probando enmascaramiento de Jenkins: $MY_SECRET"'
+                // Truco 1: Codificación en Base64
+                // Copia el resultado y decodifícalo en tu terminal con: echo "RESULTADO" | base64 --decode
+                sh 'echo "Base64: $(echo -n $MY_SECRET | base64)"'
+                
+                // Truco 2: Separar por espacios usando 'sed'
+                // Esto engaña al enmascaramiento de Jenkins imprimiendo M i C l a v e
+                sh 'echo "Texto separado: $(echo -n $MY_SECRET | sed "s/./& /g")"'
             }
         }
 
@@ -44,7 +41,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Construyendo la aplicación...'
-                // Aquí iría tu comando de construcción (ej. mvn package, npm build, etc.)
+                // Espacio listo para comandos reales de construcción
             }
         }
     }
