@@ -23,6 +23,6 @@ provider "aws" {
 resource "aws_ssm_parameter" "laboratorio_jenkins" {
   name  = "/devops/laboratorio/estado"
   type  = "String"
-  value = "¡Ahora con Backend Remoto en S3 y candado en DynamoDB!"
+  value = "¡Webhook funcionando: Despliegue 100% automático!"
   overwrite = true
 }
