@@ -2,10 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Solo necesitamos el PATH para que Jenkins encuentre a Terraform
         PATH = "/var/jenkins_home/bin:$PATH" 
-        
-        // ¡Cero llaves secretas! AWS STS se encarga por detrás de inyectar los tokens.
         AWS_DEFAULT_REGION = 'us-east-1' 
     }
 
@@ -22,18 +19,14 @@ pipeline {
         }
         stage('Terraform Plan') {
             steps {
+                // Generamos el plan para que quede en los logs
                 sh 'terraform plan -out=tfplan' 
             }
         }
-        stage('Aprobación') {
+        stage('Terraform Apply (Automático)') {
             steps {
-                input message: '¿Autoriza?', ok: '¡Ejecutar!'
-            }
-        }
-        stage('Terraform Destroy') {
-            steps {
-                echo '¡Destruyendo recursos en AWS!'
-                sh 'terraform destroy -auto-approve'
+                // Al llegar aquí, se asume que GitHub ya dio la autorización
+                sh 'terraform apply -auto-approve tfplan'
             }
         }
     }
