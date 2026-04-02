@@ -23,6 +23,6 @@ provider "aws" {
 resource "aws_ssm_parameter" "laboratorio_jenkins" {
   name  = "/devops/laboratorio/estado"
   type  = "String"
-  value = "Jenkins ahora comenta mis PRs!"
+  value = "Jenkins ahora comenta mis PRs!!"
   overwrite = true
 }
