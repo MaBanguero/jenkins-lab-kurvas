@@ -23,6 +23,6 @@ provider "aws" {
 resource "aws_ssm_parameter" "laboratorio_jenkins" {
   name  = "/devops/laboratorio/estado"
   type  = "String"
-  value = "¡Webhook funcionando: Despliegue 100% automático!"
+  value = "Aprobado y desplegado mediante Pull Request en GitHub"
   overwrite = true
 }
